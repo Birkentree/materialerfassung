@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#194661">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Material">
+  <meta name="format-detection" content="telephone=no">
+  <title>Ollinger Materialerfassung</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero card hero-card">
+      <div>
+        <p class="eyebrow">OLLINGER</p>
+        <h1>Materialerfassung</h1>
+        <p>Suchen · Favoriten · Mengen zusammenfassen · CSV-Export</p>
+      </div>
+      <div class="hero-actions">
+        <span id="networkBadge" class="status-badge">Online</span>
+        <button id="installButton" class="button button-light button-small" type="button">App installieren</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="section-heading">
+        <div><h2>Auftrag</h2><p>Kopfdaten der Materialerfassung</p></div>
+      </div>
+      <div class="grid-two">
+        <label class="field"><span>Kunde</span><input id="customer" autocomplete="organization" placeholder="z. B. Mustermann GmbH"></label>
+        <label class="field"><span>Baustellenadresse</span><input id="project" autocomplete="street-address" placeholder="Straße, Hausnummer, Ort"></label>
+        <label class="field"><span>Monteur</span><input id="installer" autocomplete="name" placeholder="Name des Monteurs"></label>
+        <label class="field"><span>Datum</span><input id="captureDate" type="date"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <div><h2>Material hinzufügen</h2><p>Material wählen und gewünschte Menge eintragen</p></div>
+      </div>
+
+      <div class="subsection">
+        <div class="label-row"><span class="field-label">Favoriten</span></div>
+        <div id="favorites" class="chip-row"></div>
+      </div>
+
+      <label class="field"><span>Materialgruppe / Schnellfilter</span>
+        <select id="groupSelect"></select>
+      </label>
+
+      <div class="field autocomplete-wrap">
+        <span>Material / Artikel</span>
+        <input id="materialSearch" autocomplete="off" inputmode="search" placeholder="Material suchen – auch über alle Gruppen">
+        <div id="suggestions" class="suggestions" hidden></div>
+        <small>Die Suche berücksichtigt Kurzbezeichnung, lange Bezeichnung, Materialgruppe, Artikelnummer und EFG.</small>
+      </div>
+
+      <label id="customMaterialField" class="field" hidden><span>Eigene Materialbezeichnung</span><input id="customMaterial" placeholder="Eigene Materialbezeichnung"></label>
+
+      <div id="selectedInfo" class="selected-info" hidden>
+        <div><strong id="selectedUnit">Einheit: –</strong><span id="selectedGroup"></span></div>
+        <button id="favoriteButton" class="button button-outline button-small" type="button">☆ Als Favorit</button>
+      </div>
+
+      <div class="field"><span>Menge</span>
+        <div class="quantity-row">
+          <button id="minusButton" class="step-button" type="button">− 1</button>
+          <input id="quantity" class="quantity-input" inputmode="decimal" value="1" aria-label="Menge">
+          <button id="plusButton" class="step-button" type="button">+ 1</button>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <span class="field-label muted-label">Schnellauswahl</span>
+        <div id="quickQuantities" class="chip-row"></div>
+      </div>
+
+      <button id="addButton" class="button button-primary button-block" type="button">+ Position hinzufügen</button>
+    </section>
+
+    <section class="card">
+      <div class="section-heading section-heading-row">
+        <div><h2>Erfasste Positionen</h2><p>Kontrolle vor dem Export</p></div>
+        <span id="countBadge" class="count-badge">0 Positionen</span>
+      </div>
+      <div id="entries" class="entries"></div>
+    </section>
+
+    <section class="card action-card">
+      <div class="section-heading"><div><h2>Speichern & Export</h2><p>Entwurf sichern oder CSV weitergeben</p></div></div>
+      <button id="finalCheckButton" class="button button-primary button-block" type="button">Abschlussprüfung & CSV teilen / speichern</button>
+      <button id="saveButton" class="button button-soft button-block" type="button">Entwurf speichern</button>
+      <button id="newButton" class="button button-danger-outline button-block" type="button">Neue Erfassung</button>
+      <p class="helper-text">Die Erfassung wird automatisch lokal auf diesem Gerät gespeichert. Für den Export werden Kunde, Baustellenadresse, Monteur, Datum und Materialpositionen geprüft.</p>
+    </section>
+
+    <footer>Ollinger Materialerfassung · PWA</footer>
+  </main>
+
+  <dialog id="finalDialog" class="modal">
+    <form method="dialog" class="modal-card">
+      <div class="modal-head"><div><p class="eyebrow dark">PRÜFUNG</p><h2>Abschlussprüfung</h2></div><button class="icon-button" value="cancel" aria-label="Schließen">×</button></div>
+      <div id="finalSummary" class="check-list"></div>
+      <div class="modal-actions">
+        <button class="button button-outline" value="cancel">Zurück</button>
+        <button id="exportButton" class="button button-primary" value="cancel" type="button">CSV teilen / speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="installDialog" class="modal">
+    <form method="dialog" class="modal-card">
+      <div class="modal-head"><div><p class="eyebrow dark">INSTALLATION</p><h2>Als App installieren</h2></div><button class="icon-button" value="cancel" aria-label="Schließen">×</button></div>
+      <p>Auf iPhone/iPad: Öffne das Teilen-Menü des Browsers und wähle <strong>„Zum Home-Bildschirm“</strong>. Danach startet die Materialerfassung wie eine App.</p>
+      <p>Auf Android kann je nach Browser zusätzlich direkt „App installieren“ angeboten werden.</p>
+      <div class="modal-actions"><button class="button button-primary" value="cancel">Verstanden</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="./materials.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
